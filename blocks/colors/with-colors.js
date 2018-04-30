@@ -18,25 +18,25 @@ import { withEditorSettings } from '../editor-settings';
  * Higher-order component, which handles color logic for class generation
  * color value, retrieval and color attribute setting.
  *
- * @param {WPElement} WrappedComponent The wrapped component.
+ * @param {Function} mapGetSetColorToProps Function that receives getColor, setColor, and props,
+ *                                         and returns additional props to pass to the component.
  *
- * @return {Component} Component with a new colors prop.
+ * @return {Function} Higher-order component.
  */
-export default createHigherOrderComponent(
+export default ( mapGetSetColorToProps ) => createHigherOrderComponent(
 	withEditorSettings(
 		( settings, props ) => {
 			const colors = get( settings, [ 'colors' ], [] );
-			return {
-				initializeColor: ( { colorContext, colorAttribute, customColorAttribute } ) => ( {
-					value: getColorValue(
-						colors,
-						props.attributes[ colorAttribute ],
-						props.attributes[ customColorAttribute ]
-					),
-					class: getColorClass( colorContext, props.attributes[ colorAttribute ] ),
-					set: setColorValue( colors, colorAttribute, customColorAttribute, props.setAttributes ),
-				} ),
+			const getColor = ( colorValue, customColorValue, colorContext ) => {
+				return {
+					value: getColorValue( colors, colorValue, customColorValue ),
+					class: getColorClass( colorContext, colorValue ),
+				};
 			};
+			const setColor = ( colorAttribute, customColorAttribute, setAttributes ) => {
+				return setColorValue( colors, colorAttribute, customColorAttribute, setAttributes );
+			};
+			return mapGetSetColorToProps( getColor, setColor, props );
 		} ),
 	'withColors'
 );

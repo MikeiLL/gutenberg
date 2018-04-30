@@ -135,7 +135,10 @@ class ParagraphBlock extends Component {
 			mergeBlocks,
 			onReplace,
 			className,
-			initializeColor,
+			backgroundColor,
+			textColor,
+			setBackgroundColor,
+			setTextColor,
 			fallbackBackgroundColor,
 			fallbackTextColor,
 			fallbackFontSize,
@@ -150,16 +153,6 @@ class ParagraphBlock extends Component {
 		} = attributes;
 
 		const fontSize = this.getFontSize();
-		const textColor = initializeColor( {
-			colorContext: 'color',
-			colorAttribute: 'textColor',
-			customColorAttribute: 'customTextColor',
-		} );
-		const backgroundColor = initializeColor( {
-			colorContext: 'background-color',
-			colorAttribute: 'backgroundColor',
-			customColorAttribute: 'customBackgroundColor',
-		} );
 
 		return (
 			<Fragment>
@@ -220,13 +213,13 @@ class ParagraphBlock extends Component {
 					<PanelColor title={ __( 'Background Color' ) } colorValue={ backgroundColor.value } initialOpen={ false }>
 						<ColorPalette
 							value={ backgroundColor.value }
-							onChange={ backgroundColor.set }
+							onChange={ setBackgroundColor }
 						/>
 					</PanelColor>
 					<PanelColor title={ __( 'Text Color' ) } colorValue={ textColor.value } initialOpen={ false }>
 						<ColorPalette
 							value={ textColor.value }
-							onChange={ textColor.set }
+							onChange={ setTextColor }
 						/>
 					</PanelColor>
 					<ContrastChecker
@@ -433,7 +426,14 @@ export const settings = {
 	},
 
 	edit: compose(
-		withColors,
+		withColors( ( getColor, setColor, { attributes, setAttributes } ) => {
+			return {
+				backgroundColor: getColor( attributes.backgroundColor, attributes.customBackgroundColor, 'background-color' ),
+				setBackgroundColor: setColor( 'backgroundColor', 'customBackgroundColor', setAttributes ),
+				textColor: getColor( attributes.textColor, attributes.customTextColor, 'color' ),
+				setTextColor: setColor( 'textColor', 'customTextColor', setAttributes ),
+			};
+		} ),
 		FallbackStyles,
 	)( ParagraphBlock ),
 
